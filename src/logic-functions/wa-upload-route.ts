@@ -138,12 +138,12 @@ export const handler = async (
      * "Upload"'. The method existing on a client is not evidence its endpoint
      * serves the mutation.
      */
-    const uploaded = await metadataClient().uploadFile(
-      bytes,
+    // The stored content type is derived from `filename` by the platform (2.49+).
+    const uploaded = await metadataClient().uploadFile({
+      fileBuffer: bytes,
       filename,
-      contentType,
-      fieldId,
-    );
+      fieldMetadataUniversalIdentifier: fieldId,
+    });
 
     log.info('wa.upload.stored', { size: uploaded.size });
 

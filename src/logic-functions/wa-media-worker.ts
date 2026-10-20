@@ -275,12 +275,15 @@ export const processMedia = async (
       throw new Error('Could not resolve the mediaFile field identifier');
     }
 
-    const file = await metadataClient().uploadFile(
-      download.buffer,
-      storedFilename,
-      mimeType ?? download.mimeType,
-      mediaFileFieldId,
-    );
+    /**
+     * No content type is passed: since 2.49 the platform derives it from the
+     * filename, which `storageFilename` already gives the right extension.
+     */
+    const file = await metadataClient().uploadFile({
+      fileBuffer: download.buffer,
+      filename: storedFilename,
+      fieldMetadataUniversalIdentifier: mediaFileFieldId,
+    });
 
     await patchMessage(message.id, {
       mediaMeta: {
