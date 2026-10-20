@@ -255,6 +255,18 @@ describe('config parsing', () => {
     expect(intVar('WA_X', 1)).toBe(7);
     expect(listVar('WA_MISSING', ['a'])).toEqual(['a']);
   });
+
+  /** How Twenty injects an ARRAY variable, and how an operator types one. */
+  it('reads a list as JSON or comma-separated', () => {
+    process.env.WA_X = '["STOP", " SAIR ", ""]';
+    expect(listVar('WA_X', ['a'])).toEqual(['STOP', 'SAIR']);
+
+    process.env.WA_X = 'STOP, SAIR';
+    expect(listVar('WA_X', ['a'])).toEqual(['STOP', 'SAIR']);
+
+    process.env.WA_X = '[]';
+    expect(listVar('WA_X', ['a'])).toEqual(['a']);
+  });
 });
 
 describe('batching', () => {
