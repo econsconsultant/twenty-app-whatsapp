@@ -49,6 +49,7 @@ export type Caller = {
 type RoleMember = { id: string; userWorkspaceId: string | null };
 
 type RoleAssignment = {
+  id: string;
   universalIdentifier: string | null;
   canUpdateAllSettings: boolean;
   members: RoleMember[];
@@ -72,6 +73,7 @@ const loadRoleAssignments = async (): Promise<RoleAssignment[]> => {
 
   const result = await metadataClient().query({
     getRoles: {
+      id: true,
       universalIdentifier: true,
       canUpdateAllSettings: true,
       workspaceMembers: { id: true, userWorkspaceId: true },
@@ -79,6 +81,7 @@ const loadRoleAssignments = async (): Promise<RoleAssignment[]> => {
   });
 
   const roles: RoleAssignment[] = (result.getRoles ?? []).map((role) => ({
+    id: role.id,
     universalIdentifier: role.universalIdentifier ?? null,
     canUpdateAllSettings: role.canUpdateAllSettings === true,
     /**
@@ -229,13 +232,25 @@ export const requireCaller = async (
   const isWorkspaceAdmin = mine.some((role) => role.canUpdateAllSettings);
   const isAdmin = identifiers.includes(ROLE_ADMIN) || isWorkspaceAdmin;
 
+  /**
+   * Twenty gives a member exactly one role, so a workspace whose reps hold a
+   * role of its own ("Sales Manager") cannot also hand them WhatsApp Agent.
+   * `WA_ALLOW_AGENT_ROLES` names such roles, by id or universal identifier.
+   */
+  const agentRoles = config.allowAgentRoles();
+  const isListedAgent = mine.some(
+    (role) =>
+      agentRoles.includes(role.id) ||
+      (role.universalIdentifier !== null && agentRoles.includes(role.universalIdentifier)),
+  );
+
   return {
     userWorkspaceId,
     workspaceMemberId,
     roleUniversalIdentifiers: identifiers,
     isAdmin,
     // Admin implies agent: every admin can also do everything a rep can.
-    isAgent: isAdmin || identifiers.includes(ROLE_AGENT),
+    isAgent: isAdmin || identifiers.includes(ROLE_AGENT) || isListedAgent,
     isMachine: false,
   };
 };

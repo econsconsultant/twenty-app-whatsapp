@@ -69,11 +69,13 @@ describe('requireRole', () => {
 describe('rolesForCaller', () => {
   const roles = [
     {
+      id: 'role-1',
       universalIdentifier: ROLE_AGENT,
       canUpdateAllSettings: false,
       members: [{ id: 'wm-1', userWorkspaceId: null }],
     },
     {
+      id: 'role-2',
       universalIdentifier: ROLE_ADMIN,
       canUpdateAllSettings: false,
       members: [{ id: 'wm-2', userWorkspaceId: null }],
@@ -115,7 +117,7 @@ describe('rolesForCaller', () => {
 
   it('does not let a null userWorkspaceId on both sides count as a match', () => {
     const orphan = [
-      { universalIdentifier: ROLE_ADMIN, canUpdateAllSettings: true, members: [] },
+      { id: 'role-3', universalIdentifier: ROLE_ADMIN, canUpdateAllSettings: true, members: [] },
     ];
 
     expect(rolesForCaller(orphan, { userWorkspaceId: 'uw-1', workspaceMemberId: 'wm-1' })).toEqual(

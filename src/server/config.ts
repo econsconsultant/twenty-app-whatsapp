@@ -131,6 +131,7 @@ export const DEFAULTS = {
   rateUtilityUsd: 0.004,
   rateAuthenticationUsd: 0.004,
   allowApiKeyAdmin: false,
+  allowAgentRoles: [] as string[],
 } as const;
 
 export const config = {
@@ -216,6 +217,8 @@ export const config = {
    * admin authority is a decision a workspace makes explicitly, not a default.
    */
   allowApiKeyAdmin: () => boolVar('WA_ALLOW_API_KEY_ADMIN', DEFAULTS.allowApiKeyAdmin),
+  /** Role ids or universal identifiers whose members count as agents. */
+  allowAgentRoles: () => listVar('WA_ALLOW_AGENT_ROLES', [...DEFAULTS.allowAgentRoles]),
   rates: () => ({
     marketingUsd: numberVar('WA_RATE_MARKETING_USD', DEFAULTS.rateMarketingUsd),
     utilityUsd: numberVar('WA_RATE_UTILITY_USD', DEFAULTS.rateUtilityUsd),
