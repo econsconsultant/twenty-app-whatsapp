@@ -1,21 +1,25 @@
+import { getApplicationVariable } from 'twenty-sdk/front-component';
+
+import { resolveTimeZone } from '../../domain/time-zone';
 import type { Lang, Translate } from './copy';
 
 /**
- * Dates, countdowns and sizes — in Africa/Luanda (FR-UI-5, specs/08 §8).
+ * Dates, countdowns and sizes — in the `WA_TIME_ZONE` zone (FR-UI-5, specs/08 §8).
  *
- * The time zone is not the reader's browser. A rep in Lisbon looking at an
- * Angolan number's conversation must see the day boundary the *customer* is on,
- * or a message sent at 23:30 in Luanda files itself under tomorrow and the day
- * separators stop meaning anything. Same reasoning as the campaign quiet-hours
- * rule (D-44).
+ * The time zone is not the reader's browser. A rep travelling abroad looking at
+ * a customer's conversation must see the day boundary the *customer* is on, or
+ * a message sent at 23:30 files itself under tomorrow and the day separators
+ * stop meaning anything. Same reasoning as the campaign quiet-hours rule (D-44).
+ *
+ * Read at format time, not import time: the host fills the variables in before
+ * the component renders, not necessarily before this module loads.
  */
-
-export const CHAT_TIME_ZONE = 'Africa/Luanda';
+export const chatTimeZone = (): string => resolveTimeZone(getApplicationVariable('WA_TIME_ZONE'));
 
 const LOCALE: Record<Lang, string> = { pt: 'pt-PT', en: 'en-GB' };
 
 const formatter = (lang: Lang, options: Intl.DateTimeFormatOptions): Intl.DateTimeFormat =>
-  new Intl.DateTimeFormat(LOCALE[lang], { timeZone: CHAT_TIME_ZONE, ...options });
+  new Intl.DateTimeFormat(LOCALE[lang], { timeZone: chatTimeZone(), ...options });
 
 export const parseDate = (value: string | null | undefined): Date | null => {
   if (typeof value !== 'string' || value.length === 0) return null;
@@ -35,7 +39,7 @@ export const clockTime = (value: string | null | undefined, lang: Lang): string 
 };
 
 /**
- * The calendar day in Luanda, as a comparable key — never a display string.
+ * The calendar day in the chat zone, as a comparable key — never a display string.
  *
  * Assembled from parts rather than formatted, because `format()` gives a
  * locale's *order* (17/08 here, 08/17 there) and a key whose shape depends on

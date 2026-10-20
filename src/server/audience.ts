@@ -1,5 +1,6 @@
 import type { AudienceCursor, AudienceDefinition } from '../domain/campaign/audience';
 import { translateViewFilters } from '../domain/campaign/view-filter';
+import { config } from './config';
 import { pageOf, query } from './repositories/base';
 import type { PersonRecord } from './repositories/people';
 import { fieldsForObject, findView, listViewFilterGroups, listViewFilters } from './repositories/views';
@@ -136,7 +137,13 @@ export const resolveViewFilter = async (
     fieldsForObject(view.objectMetadataId),
   ]);
 
-  const translated = translateViewFilters({ filters, groups, fields, now });
+  const translated = translateViewFilters({
+    filters,
+    groups,
+    fields,
+    now,
+    timeZone: config.timeZone(),
+  });
 
   if (!translated.ok) {
     throw new AudienceError(

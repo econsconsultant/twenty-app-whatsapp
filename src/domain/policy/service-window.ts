@@ -4,7 +4,7 @@ import { WINDOW_KIND, WINDOW_STATE, type WindowKind, type WindowState } from '..
  * Customer service window arithmetic (FR-IN-3, FR-OUT-2, FR-IN-6).
  *
  * Everything here is UTC epoch milliseconds. No local time, no timezone
- * library, therefore no DST class of bug — display formatting in Africa/Luanda
+ * library, therefore no DST class of bug — display formatting in WA_TIME_ZONE
  * happens only in front components.
  */
 

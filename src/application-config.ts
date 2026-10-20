@@ -168,6 +168,13 @@ export default defineApplication({
       value: '20000',
       type: FieldType.NUMBER,
     },
+    WA_TIME_ZONE: {
+      universalIdentifier: '1e5448f4-0fe6-491a-9925-ae9235166756',
+      description:
+        'IANA time zone for chat timestamps, day separators, campaign `now.*` variables and "today" audience filters — the customers’ zone, not the reader’s, e.g. Europe/Lisbon. An unknown name falls back to Africa/Luanda.',
+      value: 'Africa/Luanda',
+      type: FieldType.TEXT,
+    },
     WA_CAMPAIGN_BATCH_SIZE: {
       universalIdentifier: 'e9c1a7d5-4f83-462b-8d09-7a3e5c2b1f48',
       description: 'Recipients claimed per runner tick (AR-20).',

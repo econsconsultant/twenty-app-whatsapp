@@ -1,3 +1,5 @@
+import { DEFAULT_TIME_ZONE, resolveTimeZone } from '../domain/time-zone';
+
 /**
  * Application-variable reads (NFR-M1).
  *
@@ -132,6 +134,7 @@ export const DEFAULTS = {
   rateAuthenticationUsd: 0.004,
   allowApiKeyAdmin: false,
   allowAgentRoles: [] as string[],
+  timeZone: DEFAULT_TIME_ZONE,
 } as const;
 
 export const config = {
@@ -219,6 +222,8 @@ export const config = {
   allowApiKeyAdmin: () => boolVar('WA_ALLOW_API_KEY_ADMIN', DEFAULTS.allowApiKeyAdmin),
   /** Role ids or universal identifiers whose members count as agents. */
   allowAgentRoles: () => listVar('WA_ALLOW_AGENT_ROLES', [...DEFAULTS.allowAgentRoles]),
+  /** IANA zone for rendered dates and day boundaries; an unknown name falls back. */
+  timeZone: () => resolveTimeZone(raw('WA_TIME_ZONE')),
   rates: () => ({
     marketingUsd: numberVar('WA_RATE_MARKETING_USD', DEFAULTS.rateMarketingUsd),
     utilityUsd: numberVar('WA_RATE_UTILITY_USD', DEFAULTS.rateUtilityUsd),

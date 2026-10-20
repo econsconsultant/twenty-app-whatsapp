@@ -33,7 +33,7 @@ import type { RendererCallbacks } from './renderers';
  * narrow panel a desktop layout whenever the desktop was wide.
  *
  * Day separators are computed during render rather than stored, because the day
- * a message belongs to depends on the reader's time zone rule (Africa/Luanda)
+ * a message belongs to depends on the reader's time zone rule (WA_TIME_ZONE)
  * and not on anything the server can bake in.
  */
 

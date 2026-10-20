@@ -1,4 +1,4 @@
-import { describe, expect, it } from 'vitest';
+import { afterEach, describe, expect, it } from 'vitest';
 
 import { TABLES, translateWith } from './copy';
 import { clockTime, countdown, dayKey, daySeparator, fileSize, money } from './format';
@@ -6,10 +6,14 @@ import { clockTime, countdown, dayKey, daySeparator, fileSize, money } from './f
 const t = translateWith('pt');
 
 /**
- * Africa/Luanda is UTC+1 with no daylight saving, so 23:30 UTC is already
- * tomorrow for the customer. Every assertion below is about that hour.
+ * Africa/Luanda, the default, is UTC+1 with no daylight saving, so 23:30 UTC is
+ * already tomorrow for the customer. Every assertion below is about that hour.
  */
 describe('day boundaries', () => {
+  afterEach(() => {
+    delete process.env.applicationVariables;
+  });
+
   it('files a late-evening message under the customer’s day, not UTC’s', () => {
     // 23:30Z on the 16th is 00:30 on the 17th in Luanda.
     expect(dayKey('2026-08-16T23:30:00.000Z')).toBe('2026-08-17');
@@ -28,7 +32,16 @@ describe('day boundaries', () => {
     expect(daySeparator('2026-08-16T12:00:00.000Z', now, 'pt', t)).toBe('Ontem');
   });
 
-  it('shows the clock in Luanda, not in the reader’s zone', () => {
+  it('shows the clock in the customer’s zone, not in the reader’s', () => {
+    expect(clockTime('2026-08-16T23:30:00.000Z', 'pt')).toBe('00:30');
+  });
+
+  /** How the host hands a front component its application variables. */
+  it('follows WA_TIME_ZONE, and ignores a name Intl does not know', () => {
+    process.env.applicationVariables = JSON.stringify({ WA_TIME_ZONE: 'Asia/Riyadh' });
+    expect(clockTime('2026-08-16T21:30:00.000Z', 'pt')).toBe('00:30');
+
+    process.env.applicationVariables = JSON.stringify({ WA_TIME_ZONE: 'Mars/Olympus' });
     expect(clockTime('2026-08-16T23:30:00.000Z', 'pt')).toBe('00:30');
   });
 });

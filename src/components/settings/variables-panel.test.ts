@@ -59,6 +59,7 @@ describe('sectionOf', () => {
     ['META_APP_ID', 'connection'],
     ['WA_PROVIDER', 'connection'],
     ['WA_POLL_INTERVAL_INBOX_MS', 'interface'],
+    ['WA_TIME_ZONE', 'interface'],
     ['WA_ALLOW_API_KEY_ADMIN', 'access'],
     ['WA_DEFAULT_COUNTRY_CALLING_CODE', 'sending'],
   ])('files %s under %s', (key, section) => {

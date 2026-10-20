@@ -1,4 +1,4 @@
-import { CAMPAIGN_TIME_ZONE } from './variable-resolution';
+import { DEFAULT_TIME_ZONE } from '../time-zone';
 
 /**
  * Translating a saved Twenty view into a Core API filter (FR-CAM-2a).
@@ -142,9 +142,9 @@ const asStringList = (value: unknown): string[] => {
  * Read from `Intl` rather than hard-coded, so the day boundary stays right if
  * the zone is ever changed to one that observes daylight saving.
  */
-const zoneOffsetMs = (at: Date): number => {
+const zoneOffsetMs = (at: Date, timeZone: string): number => {
   const parts = new Intl.DateTimeFormat('en-US', {
-    timeZone: CAMPAIGN_TIME_ZONE,
+    timeZone,
     hour12: false,
     year: 'numeric',
     month: '2-digit',
@@ -173,21 +173,21 @@ const zoneOffsetMs = (at: Date): number => {
  * Midnight **in the campaign's time zone**, expressed as an instant.
  *
  * A day filter used to be expanded against UTC midnight while every date the
- * campaign *renders* uses `CAMPAIGN_TIME_ZONE` — so "created today" meant
+ * campaign *renders* uses the campaign zone — so "created today" meant
  * 01:00 to 01:00 local, and a contact added at half past midnight fell into
  * yesterday's audience (D-44). One hour of skew for Angola, more elsewhere,
  * and invisible either way: the audience simply comes back a little different
  * from the one the admin saw in the view.
  */
-const startOfDay = (at: Date): Date => {
-  const shifted = new Date(at.getTime() + zoneOffsetMs(at));
+const startOfDay = (at: Date, timeZone: string): Date => {
+  const shifted = new Date(at.getTime() + zoneOffsetMs(at, timeZone));
   const localMidnight = Date.UTC(
     shifted.getUTCFullYear(),
     shifted.getUTCMonth(),
     shifted.getUTCDate(),
   );
 
-  return new Date(localMidnight - zoneOffsetMs(new Date(localMidnight)));
+  return new Date(localMidnight - zoneOffsetMs(new Date(localMidnight), timeZone));
 };
 
 const addDays = (at: Date, days: number): Date =>
@@ -206,10 +206,12 @@ export const translateFilter = ({
   filter,
   field,
   now,
+  timeZone = DEFAULT_TIME_ZONE,
 }: {
   filter: ViewFilterRow;
   field: FieldDescriptor;
   now: Date;
+  timeZone?: string;
 }): CoreFilter | string => {
   const operand = filter.operand.toUpperCase() as ViewFilterOperand;
   const value = parseValue(filter.value);
@@ -389,12 +391,12 @@ export const translateFilter = ({
       case VIEW_FILTER_OPERAND.IS: {
         if (!valid) return `${where}: invalid date`;
 
-        const from = startOfDay(parsed!);
+        const from = startOfDay(parsed!, timeZone);
 
         return wrap({ gte: from.toISOString(), lt: addDays(from, 1).toISOString() });
       }
       case VIEW_FILTER_OPERAND.IS_TODAY: {
-        const from = startOfDay(now);
+        const from = startOfDay(now, timeZone);
 
         return wrap({ gte: from.toISOString(), lt: addDays(from, 1).toISOString() });
       }
@@ -452,6 +454,7 @@ export const translateViewFilters = ({
   groups,
   fields,
   now = new Date(),
+  timeZone = DEFAULT_TIME_ZONE,
   maxDepth = 10,
 }: {
   filters: ViewFilterRow[];
@@ -459,6 +462,8 @@ export const translateViewFilters = ({
   /** Field metadata id → the Core field it names. */
   fields: Map<string, FieldDescriptor>;
   now?: Date;
+  /** The zone day filters partition on — `config.timeZone()` on the server. */
+  timeZone?: string;
   maxDepth?: number;
 }): Translation => {
   const reasons: string[] = [];
@@ -504,7 +509,7 @@ export const translateViewFilters = ({
         continue;
       }
 
-      const translated = translateFilter({ filter, field, now });
+      const translated = translateFilter({ filter, field, now, timeZone });
 
       if (typeof translated === 'string') {
         reasons.push(translated);

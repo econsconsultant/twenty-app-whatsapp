@@ -101,6 +101,7 @@ const PAIRS: [keyof typeof DEFAULTS, string][] = [
   ['rateAuthenticationUsd', 'WA_RATE_AUTHENTICATION_USD'],
   ['allowApiKeyAdmin', 'WA_ALLOW_API_KEY_ADMIN'],
   ['allowAgentRoles', 'WA_ALLOW_AGENT_ROLES'],
+  ['timeZone', 'WA_TIME_ZONE'],
 ];
 
 /** `'0.0040'` and `0.004` are the same number; `['A','B']` and a JS array are the same list. */

@@ -177,9 +177,9 @@ describe('date filters', () => {
    * problem rather than a translation one.
    *
    * The day is the campaign's day (D-44): 23:00Z to 23:00Z is midnight to
-   * midnight in Africa/Luanda, the zone every date the campaign renders uses.
-   * Expanding against UTC instead put a contact added at 00:30 local into the
-   * previous day's audience.
+   * midnight in Africa/Luanda, the default zone every date the campaign renders
+   * uses. Expanding against UTC instead put a contact added at 00:30 local into
+   * the previous day's audience.
    */
   it('reads IS on a date as the whole local day', () => {
     expect(
@@ -190,6 +190,20 @@ describe('date filters', () => {
       }),
     ).toEqual({
       createdAt: { gte: '2026-03-03T23:00:00.000Z', lt: '2026-03-04T23:00:00.000Z' },
+    });
+  });
+
+  /** WA_TIME_ZONE moves the boundary: Riyadh's midnight is 21:00Z. */
+  it('partitions days in the zone it is given', () => {
+    expect(
+      translateFilter({
+        filter: row({ operand: 'IS', value: '2026-03-04T11:00:00.000Z' }),
+        field: field('createdAt', 'DATE_TIME'),
+        now: NOW,
+        timeZone: 'Asia/Riyadh',
+      }),
+    ).toEqual({
+      createdAt: { gte: '2026-03-03T21:00:00.000Z', lt: '2026-03-04T21:00:00.000Z' },
     });
   });
 

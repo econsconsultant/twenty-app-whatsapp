@@ -1,4 +1,5 @@
 import { toE164 } from '../phone/normalise';
+import { DEFAULT_TIME_ZONE } from '../time-zone';
 import {
   PARAMETER_LIMITS,
   isBlank,
@@ -39,14 +40,16 @@ export type ResolutionSubject = {
   workspaceMember?: { name?: { firstName?: string | null } | null } | null;
   account?: { displayName?: string | null; defaultCountryCallingCode?: string | null } | null;
   now: Date;
+  /** The zone `now.*` renders in — `config.timeZone()` on the server. */
+  timeZone?: string;
 };
 
-/** Angola has no DST, but naming the zone keeps a server in any region honest. */
-export const CAMPAIGN_TIME_ZONE = 'Africa/Luanda';
 const LOCALE = 'pt-PT';
 
-const formatNow = (now: Date, options: Intl.DateTimeFormatOptions): string =>
-  new Intl.DateTimeFormat(LOCALE, { timeZone: CAMPAIGN_TIME_ZONE, ...options }).format(now);
+const formatNow = (
+  { now, timeZone = DEFAULT_TIME_ZONE }: ResolutionSubject,
+  options: Intl.DateTimeFormatOptions,
+): string => new Intl.DateTimeFormat(LOCALE, { timeZone, ...options }).format(now);
 
 const linkUrl = (value: { primaryLinkUrl?: string | null } | string | null | undefined): string | null => {
   if (typeof value === 'string') return value;
@@ -86,9 +89,9 @@ const RESOLVERS: Record<string, Resolver> = {
   'person.linkedinLink.primaryLinkUrl': (s) => linkUrl(s.person?.linkedinLink),
   'workspaceMember.name.firstName': (s) => s.workspaceMember?.name?.firstName ?? null,
   'account.displayName': (s) => s.account?.displayName ?? null,
-  'now.date': (s) => formatNow(s.now, { day: '2-digit', month: '2-digit', year: 'numeric' }),
-  'now.month': (s) => formatNow(s.now, { month: 'long' }),
-  'now.year': (s) => formatNow(s.now, { year: 'numeric' }),
+  'now.date': (s) => formatNow(s, { day: '2-digit', month: '2-digit', year: 'numeric' }),
+  'now.month': (s) => formatNow(s, { month: 'long' }),
+  'now.year': (s) => formatNow(s, { year: 'numeric' }),
 };
 
 export const ALLOWED_BINDING_PATHS = Object.keys(RESOLVERS);

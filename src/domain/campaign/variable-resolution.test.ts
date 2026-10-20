@@ -99,11 +99,17 @@ describe('the allow-list', () => {
     expect(resolveBindingPath('person.name.firstName', subject({ person: null }))).toBeNull();
   });
 
-  it('formats dates in Africa/Luanda and pt-PT', () => {
+  it('formats dates in the campaign zone and pt-PT', () => {
     const s = subject({ now: new Date('2026-08-15T23:30:00Z') });
 
-    // Luanda is UTC+1 year-round, so 23:30Z is already the 16th locally.
+    // Luanda, the default, is UTC+1 year-round, so 23:30Z is already the 16th.
     expect(resolveBindingPath('now.date', s)).toBe('16/08/2026');
+    expect(
+      resolveBindingPath(
+        'now.date',
+        subject({ now: new Date('2026-08-15T20:30:00Z'), timeZone: 'Asia/Riyadh' }),
+      ),
+    ).toBe('15/08/2026');
     expect(resolveBindingPath('now.month', s)).toBe('agosto');
     expect(resolveBindingPath('now.year', s)).toBe('2026');
   });

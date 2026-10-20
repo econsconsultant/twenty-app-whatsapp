@@ -19,7 +19,7 @@ import { fileSize } from '../common/format';
  *
  * Pure, and keyed by copy key rather than by label, so the rows translate with
  * the rest of the surface. Timestamps are formatted by the caller, because the
- * reader's time zone rule (Africa/Luanda) is a rendering concern and this
+ * reader's time zone rule (WA_TIME_ZONE) is a rendering concern and this
  * module has no business knowing about it.
  */
 
