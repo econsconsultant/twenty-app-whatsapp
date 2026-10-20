@@ -1,5 +1,9 @@
 import { defineLogicFunction } from 'twenty-sdk/define';
-import { Response, type RoutePayload } from 'twenty-sdk/logic-function';
+import {
+  Response,
+  type LogicFunctionExecutionContext,
+  type RoutePayload,
+} from 'twenty-sdk/logic-function';
 
 import { LF_SEND_MESSAGE_ROUTE } from '../constants/universal-identifiers';
 import {
@@ -468,11 +472,12 @@ const resolveThread = async (
 
 export const handler = async (
   event: RoutePayload<SendRequestBody>,
+  executionContext?: LogicFunctionExecutionContext,
 ): Promise<Response> => {
   const log = logger.child({ fn: 'wa-send-message-route' });
 
   try {
-    const caller = await requireCaller(event);
+    const caller = await requireCaller(event, executionContext);
     requireRole(caller, 'agent');
 
     const body = event.body ?? {};

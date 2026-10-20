@@ -1,5 +1,9 @@
 import { defineLogicFunction } from 'twenty-sdk/define';
-import { Response, type RoutePayload } from 'twenty-sdk/logic-function';
+import {
+  Response,
+  type LogicFunctionExecutionContext,
+  type RoutePayload,
+} from 'twenty-sdk/logic-function';
 
 import { LF_CONSENT_ROUTE } from '../constants/universal-identifiers';
 import {
@@ -93,11 +97,12 @@ export type ImportOutcome = {
 
 export const handler = async (
   event: RoutePayload<ConsentRouteBody>,
+  context?: LogicFunctionExecutionContext,
 ): Promise<Response> => {
   const log = logger.child({ fn: 'wa-consent-route' });
 
   try {
-    const caller = await requireCaller(event);
+    const caller = await requireCaller(event, context);
 
     const body = event.body ?? {};
     const action = body.action ?? 'history';

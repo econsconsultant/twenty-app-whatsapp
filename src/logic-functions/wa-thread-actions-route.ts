@@ -1,5 +1,9 @@
 import { defineLogicFunction } from 'twenty-sdk/define';
-import { Response, type RoutePayload } from 'twenty-sdk/logic-function';
+import {
+  Response,
+  type LogicFunctionExecutionContext,
+  type RoutePayload,
+} from 'twenty-sdk/logic-function';
 
 import { LF_THREAD_ACTIONS_ROUTE } from '../constants/universal-identifiers';
 import { THREAD_STATUS, type ThreadStatus } from '../domain/constants';
@@ -167,11 +171,12 @@ const sendReadReceipt = async (thread: WhatsappThreadRecord): Promise<boolean> =
 
 export const handler = async (
   event: RoutePayload<ThreadActionBody>,
+  context?: LogicFunctionExecutionContext,
 ): Promise<Response> => {
   const log = logger.child({ fn: 'wa-thread-actions-route' });
 
   try {
-    const caller = await requireCaller(event);
+    const caller = await requireCaller(event, context);
     requireRole(caller, 'agent');
 
     const body = event.body ?? {};

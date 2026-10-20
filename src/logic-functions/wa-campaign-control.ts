@@ -1,5 +1,9 @@
 import { defineLogicFunction } from 'twenty-sdk/define';
-import { Response, type RoutePayload } from 'twenty-sdk/logic-function';
+import {
+  Response,
+  type LogicFunctionExecutionContext,
+  type RoutePayload,
+} from 'twenty-sdk/logic-function';
 
 import {
   LF_CAMPAIGN_SNAPSHOT,
@@ -541,11 +545,12 @@ const testSend = async ({
 
 export const handler = async (
   event: RoutePayload<CampaignControlBody>,
+  context?: LogicFunctionExecutionContext,
 ): Promise<Response> => {
   const log = logger.child({ fn: 'wa-campaign-control' });
 
   try {
-    const caller = await requireCaller(event);
+    const caller = await requireCaller(event, context);
 
     const body = event.body ?? {};
     const action = body.action ?? 'preflight';

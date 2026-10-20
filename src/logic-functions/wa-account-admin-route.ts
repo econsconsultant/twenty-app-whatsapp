@@ -1,5 +1,10 @@
 import { defineLogicFunction } from 'twenty-sdk/define';
-import { Response, kv, type RoutePayload } from 'twenty-sdk/logic-function';
+import {
+  Response,
+  kv,
+  type LogicFunctionExecutionContext,
+  type RoutePayload,
+} from 'twenty-sdk/logic-function';
 
 import {
   LF_ACCOUNT_ADMIN_ROUTE,
@@ -543,11 +548,12 @@ const probeNumber = async (
 
 export const handler = async (
   event: RoutePayload<AccountRouteBody>,
+  context?: LogicFunctionExecutionContext,
 ): Promise<Response> => {
   const log = logger.child({ fn: 'wa-account-admin-route' });
 
   try {
-    const caller = await requireCaller(event);
+    const caller = await requireCaller(event, context);
     requireRole(caller, 'admin');
 
     const body = event.body ?? {};

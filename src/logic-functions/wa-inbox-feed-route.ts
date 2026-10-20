@@ -1,5 +1,9 @@
 import { defineLogicFunction } from 'twenty-sdk/define';
-import { Response, type RoutePayload } from 'twenty-sdk/logic-function';
+import {
+  Response,
+  type LogicFunctionExecutionContext,
+  type RoutePayload,
+} from 'twenty-sdk/logic-function';
 
 import { LF_INBOX_FEED_ROUTE } from '../constants/universal-identifiers';
 import {
@@ -714,11 +718,14 @@ const bootstrapScope = async (caller: Caller, now: Date): Promise<FeedEnvelope> 
   };
 };
 
-export const handler = async (event: RoutePayload): Promise<Response> => {
+export const handler = async (
+  event: RoutePayload,
+  context?: LogicFunctionExecutionContext,
+): Promise<Response> => {
   const log = logger.child({ fn: 'wa-inbox-feed-route' });
 
   try {
-    const caller = await requireCaller(event);
+    const caller = await requireCaller(event, context);
 
     requireRole(caller, 'agent');
 

@@ -1,5 +1,10 @@
 import { defineLogicFunction } from 'twenty-sdk/define';
-import { Response, kv, type RoutePayload } from 'twenty-sdk/logic-function';
+import {
+  Response,
+  kv,
+  type LogicFunctionExecutionContext,
+  type RoutePayload,
+} from 'twenty-sdk/logic-function';
 
 import { LF_TEMPLATE_SUBMIT } from '../constants/universal-identifiers';
 import {
@@ -121,11 +126,12 @@ export const missingExamples = (components: MetaTemplateComponent[]): string[] =
 
 export const handler = async (
   event: RoutePayload<TemplateSubmitBody>,
+  context?: LogicFunctionExecutionContext,
 ): Promise<Response> => {
   const log = logger.child({ fn: 'wa-template-submit' });
 
   try {
-    const caller = await requireCaller(event);
+    const caller = await requireCaller(event, context);
     requireRole(caller, 'admin');
 
     const body = event.body ?? {};
