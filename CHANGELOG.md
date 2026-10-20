@@ -2,6 +2,36 @@
 
 All notable changes to this application are documented in this file.
 
+## 0.1.3 — Twenty 2.49
+
+Every inbox request on Twenty 2.49 was refused with *"This action requires the WhatsApp agent
+role"*, workspace admins included. Requires Twenty 2.49 or later.
+
+### Fixed
+
+- **The caller is identified from the execution context.** Route triggers stopped forwarding
+  `authorization` in Twenty 2.44, and the role map lists members with a null `userWorkspaceId`, so
+  no caller matched any role. The handler's `workspaceMemberId` is the join now; a caller without
+  one still gets no roles.
+- **Routes no longer ask for the `authorization` header**, which 2.49 rejects at sync as a
+  credential header.
+- **Server API clients run as the application.** A person-triggered function receives a token
+  limited to that person's role, which cannot read the role map or, for most roles, the WhatsApp
+  objects the routes authorise themselves.
+- **A Twenty workspace admin (`canUpdateAllSettings`) counts as a WhatsApp admin.**
+- **ARRAY application variables are read as the JSON Twenty injects**, not only as comma lists —
+  keyword lists and the new role list depended on it.
+- Adapted to SDK 2.49: object-argument `uploadFile`, and `aboutDescription` read from the README.
+
+### Added
+
+- **`WA_ALLOW_AGENT_ROLES`**: workspace roles, by id or universal identifier, whose members use
+  the inbox as agents. A member holds one role, so a workspace's own sales role cannot also be
+  WhatsApp Agent.
+- **`WA_TIME_ZONE`**: the zone dates render and campaign days partition in, previously hardcoded
+  to Africa/Luanda. Defaults to Africa/Luanda, so existing installs are unchanged; an unknown
+  name falls back to the default.
+
 ## 0.1.1 — the callback URL nobody could use
 
 Four defects reported from a live 2.31.6 install ([#1]), all confirmed against the code.
