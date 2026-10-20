@@ -100,7 +100,7 @@ const PUBLIC_ROUTES: Record<string, string> = {
 type RouteFacts = {
   path: string;
   isAuthRequired: boolean;
-  forwardsAuthorization: boolean;
+  forwardsCredentialHeader: boolean;
   callsRequireCaller: boolean;
   roles: Set<string>;
 };
@@ -115,7 +115,9 @@ const routeFactsFor = (file: string): RouteFacts | null => {
   return {
     path,
     isAuthRequired: /isAuthRequired:\s*true/.test(source),
-    forwardsAuthorization: /forwardedRequestHeaders:\s*\[\s*'authorization'\s*\]/.test(source),
+    forwardsCredentialHeader: /forwardedRequestHeaders:[^\]]*'(authorization|cookie|proxy-authorization)'/i.test(
+      source,
+    ),
     callsRequireCaller: /requireCaller\s*\(/.test(source),
     roles: new Set(
       [...source.matchAll(/requireRole\(\s*caller\s*,\s*'(admin|agent)'\s*\)/g)].map(
@@ -166,11 +168,10 @@ describe('the route role matrix (SEC-5)', () => {
     expect(route!.facts.callsRequireCaller).toBe(true);
 
     /**
-     * Without the forwarded header the route cannot ask the platform who the
-     * caller is and falls back to a `userWorkspaceId` nothing else joins on —
-     * which is how `/s/*` auth was broken for every human until D-53.
+     * Twenty 2.44+ refuses to sync a route that forwards a credential header,
+     * and the caller is identified from the execution context instead.
      */
-    expect(route!.facts.forwardsAuthorization).toBe(true);
+    expect(route!.facts.forwardsCredentialHeader).toBe(false);
   });
 
   it.each(Object.entries(ROUTES))('%s gates at the reviewed role', (_path, spec) => {
