@@ -154,8 +154,13 @@ describe('the Meta seam', () => {
     expect(offenders(/META_ACCESS_TOKEN/, withoutSecretReaders)).toEqual([]);
   });
 
+  /** `copy.ts` names the variable in the health panel's help text; it never reads it. */
   it('keeps the app secret to the provider and the config declaration', () => {
-    expect(offenders(/META_APP_SECRET/, withoutSecretReaders)).toEqual([]);
+    const withoutHelpText = withoutSecretReaders.filter(
+      (file) => !file.endsWith('components/common/copy.ts'),
+    );
+
+    expect(offenders(/META_APP_SECRET/, withoutHelpText)).toEqual([]);
   });
 
   /**
