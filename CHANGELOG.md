@@ -4,8 +4,8 @@ All notable changes to this application are documented in this file.
 
 ## 0.1.3 — Twenty 2.49
 
-Every inbox request on Twenty 2.49 was refused with *"This action requires the WhatsApp agent
-role"*, workspace admins included. Requires Twenty 2.49 or later.
+Every inbox request on Twenty 2.44 and later was refused with *"This action requires the WhatsApp
+agent role"*, workspace admins included. Requires Twenty 2.49 or later.
 
 ### Fixed
 
@@ -31,6 +31,8 @@ role"*, workspace admins included. Requires Twenty 2.49 or later.
 - **`WA_TIME_ZONE`**: the zone dates render and campaign days partition in, previously hardcoded
   to Africa/Luanda. Defaults to Africa/Luanda, so existing installs are unchanged; an unknown
   name falls back to the default.
+
+Upgrading an existing install: see [DEPLOY.md](DEPLOY.md).
 
 ## 0.1.1 — the callback URL nobody could use
 
