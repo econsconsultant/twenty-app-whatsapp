@@ -11,6 +11,12 @@ import { nodesOf, query } from './base';
  * the CRM, not to us.
  */
 
+/**
+ * Twenty still stores and shows the actor name, but the generated input type
+ * no longer lists it, so it goes through a variable rather than a literal.
+ */
+const CREATED_BY = { source: 'MANUAL', name: 'WhatsApp' } as const;
+
 const PERSON_FIELDS = {
   id: true,
   name: { firstName: true, lastName: true },
@@ -21,7 +27,7 @@ const PERSON_FIELDS = {
     primaryPhoneNumber: true,
     primaryPhoneCallingCode: true,
     primaryPhoneCountryCode: true,
-    additionalPhones: true,
+    additionalPhones: { number: true, callingCode: true, countryCode: true },
   },
   linkedinLink: { primaryLinkUrl: true },
   whatsappOptInStatus: true,
@@ -248,7 +254,7 @@ export const createPersonFromWhatsApp = async (
                   : { primaryPhoneCountryCode: input.countryCode }),
               },
               whatsappOptInStatus: 'UNKNOWN',
-              createdBy: { source: 'MANUAL', name: 'WhatsApp' },
+              createdBy: CREATED_BY,
             },
           },
           ...PERSON_FIELDS,
