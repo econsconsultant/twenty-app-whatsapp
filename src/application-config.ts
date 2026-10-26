@@ -306,7 +306,7 @@ export default defineApplication({
     WA_ALLOW_AGENT_ROLES: {
       universalIdentifier: 'fc320927-97c0-4c27-908b-80010730e43a',
       description:
-        'Workspace roles whose members may use the WhatsApp inbox as agents, besides the WhatsApp Agent and Admin roles (Twenty allows one role per member). Each entry is a role ID — the last part of Settings → Roles → <role> URL — or a role universal identifier. Members of roles that can manage workspace settings are WhatsApp admins regardless.',
+        'Workspace roles whose members may use the WhatsApp inbox as agents, besides the WhatsApp Agent and Admin roles (Twenty allows one role per member). Tick the roles in the app’s Variables tab; each is stored as its role ID (a role universal identifier also works). Members of roles that can manage workspace settings are WhatsApp admins regardless.',
       value: [],
       type: FieldType.ARRAY,
     },

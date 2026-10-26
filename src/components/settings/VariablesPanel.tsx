@@ -1,6 +1,7 @@
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import { useTheme } from 'twenty-ui/theme-constants';
 
+import { parseListValue } from '../../domain/list-value';
 import type { Translate } from '../common/copy';
 import { ActionButton, Banner, Card, useInputStyle } from '../common/ui';
 
@@ -132,6 +133,115 @@ export const dirtyKeys = (
     )
     .map((variable) => variable.key);
 
+/**
+ * The value an `ARRAY` checklist writes when one option is ticked or cleared.
+ *
+ * Ticked items keep the order of the options, so the stored JSON does not depend
+ * on click order. Landing back on the set the server holds returns the server's
+ * own string: the stored value may be a hand-typed comma list, and an untouched
+ * selection must not count as an edit just because it would re-serialise
+ * differently.
+ */
+export const toggleListItem = ({
+  stored,
+  draft,
+  item,
+  checked,
+  optionValues,
+}: {
+  stored: string;
+  draft: string;
+  item: string;
+  checked: boolean;
+  optionValues: string[];
+}): string => {
+  const current = parseListValue(draft);
+  const next = checked
+    ? current.includes(item)
+      ? current
+      : [...current, item]
+    : current.filter((value) => value !== item);
+
+  const known = optionValues.filter((value) => next.includes(value));
+  const unknown = next.filter((value) => !optionValues.includes(value));
+  const ordered = [...known, ...unknown];
+
+  const storedItems = parseListValue(stored);
+  const sameAsStored =
+    storedItems.length === ordered.length && ordered.every((value) => storedItems.includes(value));
+
+  return sameAsStored ? stored : JSON.stringify(ordered);
+};
+
+/**
+ * Checkboxes for an `ARRAY` variable whose options the server supplies, such as
+ * `WA_ALLOW_AGENT_ROLES` listing the workspace's roles.
+ *
+ * A stored item that is not among the options (a role deleted since) is still
+ * shown, ticked, so it can be cleared rather than lingering invisibly.
+ */
+const ListChoices = ({
+  variable,
+  draft,
+  choices,
+  onChange,
+  t,
+}: {
+  variable: EditableVariable;
+  draft: string;
+  choices: SelectOption[];
+  onChange: (value: string) => void;
+  t: Translate;
+}) => {
+  const theme = useTheme();
+  const selected = parseListValue(draft);
+  const optionValues = choices.map((choice) => choice.value);
+  const rows = [
+    ...choices,
+    ...selected
+      .filter((value) => !optionValues.includes(value))
+      .map((value) => ({ value, label: t('settings.unknownListItem', { value }) })),
+  ];
+
+  return (
+    <div
+      role="group"
+      aria-label={variable.key}
+      style={{ display: 'flex', flexDirection: 'column', gap: theme.spacing[1] }}
+    >
+      {rows.map((row) => (
+        <label
+          key={row.value}
+          style={{
+            display: 'flex',
+            alignItems: 'center',
+            gap: theme.spacing[1],
+            fontSize: theme.font.size.md,
+            color: theme.font.color.secondary,
+          }}
+        >
+          <input
+            type="checkbox"
+            checked={selected.includes(row.value)}
+            onChange={(event) =>
+              onChange(
+                toggleListItem({
+                  stored: variable.value,
+                  draft,
+                  item: row.value,
+                  checked: event.target.checked,
+                  optionValues,
+                }),
+              )
+            }
+          />
+          {row.label}
+        </label>
+      ))}
+    </div>
+  );
+};
+
 const VariableRow = ({
   variable,
   draft,
@@ -209,6 +319,14 @@ const VariableRow = ({
             />
             {t(draft === 'true' ? 'common.yes' : 'common.no')}
           </label>
+        ) : variable.type === 'ARRAY' && choices.length > 0 ? (
+          <ListChoices
+            variable={variable}
+            draft={draft}
+            choices={choices}
+            onChange={onChange}
+            t={t}
+          />
         ) : choices.length > 0 ? (
           <select
             value={draft}

@@ -1017,6 +1017,11 @@ const COPY = {
   },
   'settings.variableSaved': { pt: '{key} guardada', en: '{key} saved' },
   'settings.variableEdited': { pt: 'alterada', en: 'edited' },
+  /** A stored list item the options no longer offer, such as a deleted role. */
+  'settings.unknownListItem': {
+    pt: 'Já não existe ({value})',
+    en: 'No longer exists ({value})',
+  },
   /**
    * The bar lists the keys beside this count. A single Save that commits a
    * throttle and a legal sentence together is only acceptable if the operator

@@ -6,6 +6,7 @@ import {
   dirtyKeys,
   groupVariables,
   sectionOf,
+  toggleListItem,
   type EditableVariable,
 } from './VariablesPanel';
 
@@ -133,5 +134,46 @@ describe('dirtyKeys', () => {
   /** Emptying a value is an edit, not an absence — the route stores the empty. */
   it('counts a value cleared to empty', () => {
     expect(dirtyKeys(variables, { WA_A: '' })).toEqual(['WA_A']);
+  });
+});
+
+/**
+ * The WA_ALLOW_AGENT_ROLES checklist. It stores role ids as JSON in the order
+ * the roles are listed, and undoing a change must not leave a phantom edit.
+ */
+describe('toggleListItem', () => {
+  const optionValues = ['a', 'b', 'c'];
+
+  it('ticks an item into the list, in option order', () => {
+    expect(
+      toggleListItem({ stored: '[]', draft: '["c"]', item: 'a', checked: true, optionValues }),
+    ).toBe('["a","c"]');
+  });
+
+  it('clears an item', () => {
+    expect(
+      toggleListItem({ stored: '[]', draft: '["a","c"]', item: 'a', checked: false, optionValues }),
+    ).toBe('["c"]');
+  });
+
+  it("returns the server's own string when the selection matches it again", () => {
+    expect(
+      toggleListItem({ stored: 'b, a', draft: '["a"]', item: 'b', checked: true, optionValues }),
+    ).toBe('b, a');
+  });
+
+  it('keeps an item the options no longer offer until it is cleared', () => {
+    expect(
+      toggleListItem({ stored: '[]', draft: '["gone"]', item: 'a', checked: true, optionValues }),
+    ).toBe('["a","gone"]');
+    expect(
+      toggleListItem({ stored: '[]', draft: '["a","gone"]', item: 'gone', checked: false, optionValues }),
+    ).toBe('["a"]');
+  });
+
+  it('accepts a value pasted as a bare id', () => {
+    expect(
+      toggleListItem({ stored: 'a', draft: 'a', item: 'b', checked: true, optionValues }),
+    ).toBe('["a","b"]');
   });
 });

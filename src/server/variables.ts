@@ -1,5 +1,11 @@
-import { APPLICATION_UNIVERSAL_IDENTIFIER } from '../constants/universal-identifiers';
+import {
+  APPLICATION_UNIVERSAL_IDENTIFIER,
+  DEFAULT_ROLE_UNIVERSAL_IDENTIFIER,
+  ROLE_ADMIN,
+  ROLE_AGENT,
+} from '../constants/universal-identifiers';
 import { metadataClient } from './clients';
+import { describeError, logger } from './logger';
 
 /**
  * Reading and writing this app's own application variables.
@@ -73,8 +79,77 @@ const loadApplication = async (): Promise<ApplicationRow | null> => {
   };
 };
 
-export const listVariables = async (): Promise<EditableVariable[]> =>
-  (await loadApplication())?.variables ?? [];
+/** The variable whose options are the workspace's own roles, not a fixed list. */
+export const AGENT_ROLES_KEY = 'WA_ALLOW_AGENT_ROLES';
+
+type RoleRow = {
+  id: string;
+  label: string;
+  universalIdentifier?: string | null;
+  canUpdateAllSettings: boolean;
+  canBeAssignedToUsers: boolean;
+};
+
+/**
+ * The roles worth offering for `WA_ALLOW_AGENT_ROLES`, as select options.
+ *
+ * A role ID pasted from a settings URL is exact but unreadable, and a typo in
+ * one locks a team out without a word. Listing the roles by name lets the panel
+ * show checkboxes while the variable keeps storing IDs, so renaming a role
+ * never changes who gets in.
+ *
+ * Left out: roles no member can hold, roles that manage workspace settings
+ * (already WhatsApp admins), and this app's own roles (already agents or
+ * admins, or a machine identity).
+ */
+export const toRoleOptions = (roles: RoleRow[]): { label: string; value: string }[] => {
+  const ownRoles = new Set([ROLE_ADMIN, ROLE_AGENT, DEFAULT_ROLE_UNIVERSAL_IDENTIFIER]);
+
+  return roles
+    .filter(
+      (role) =>
+        role.canBeAssignedToUsers &&
+        !role.canUpdateAllSettings &&
+        !ownRoles.has(role.universalIdentifier ?? ''),
+    )
+    .map((role) => ({ label: role.label, value: role.id }))
+    .sort((a, b) => a.label.localeCompare(b.label));
+};
+
+/** Null when the roles cannot be read: the panel then falls back to a text box. */
+const loadRoleOptions = async (): Promise<{ label: string; value: string }[] | null> => {
+  try {
+    const result = await metadataClient().query({
+      getRoles: {
+        id: true,
+        label: true,
+        universalIdentifier: true,
+        canUpdateAllSettings: true,
+        canBeAssignedToUsers: true,
+      },
+    });
+
+    return toRoleOptions(result.getRoles ?? []);
+  } catch (error) {
+    logger.warn('settings.role_options_failed', describeError(error));
+
+    return null;
+  }
+};
+
+export const listVariables = async (): Promise<EditableVariable[]> => {
+  const variables = (await loadApplication())?.variables ?? [];
+
+  if (!variables.some((variable) => variable.key === AGENT_ROLES_KEY)) return variables;
+
+  const roleOptions = await loadRoleOptions();
+
+  return roleOptions === null
+    ? variables
+    : variables.map((variable) =>
+        variable.key === AGENT_ROLES_KEY ? { ...variable, options: roleOptions } : variable,
+      );
+};
 
 /**
  * Refuses a key the app did not declare.
