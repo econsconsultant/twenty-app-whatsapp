@@ -5,6 +5,10 @@ WhatsApp agent role"*. It ships as an **in-place upgrade** of the installed app:
 identifiers, same records, same settings. This guide is for an install that is already running
 0.1.2 and whose server has been upgraded to Twenty 2.49.
 
+**Already on 0.1.3?** 0.1.4 follows the same `plan` and `apply` steps (section 2). Its plan
+changes logic function and front component code and one variable's description; it should
+destroy nothing. If it does, stop.
+
 > **Never uninstall the app.** Uninstalling deletes every WhatsApp account, thread, message,
 > consent record and campaign. Nothing below requires it, and no step should be replaced by it.
 
@@ -41,10 +45,10 @@ You review the diff with **`twenty plan`** before anything changes.
   afterwards.
 - **Database backup.** Take a `pg_dump` of the server immediately before the upgrade. It is the
   rollback.
-- **Agent role IDs.** A member holds one role, so members on a workspace role of your own (a sales
-  role, say) cannot also be WhatsApp Agent. For each such role whose members should use the inbox,
-  open it in Settings and copy its ID, the last part of the URL
-  (`/settings/members/roles/<id>`).
+- **Agent roles.** A member holds one role, so members on a workspace role of your own (a sales
+  role, say) cannot also be WhatsApp Agent. Decide which such roles should use the inbox. From
+  0.1.4 you tick them by name in the app's Variables tab; on 0.1.3, open each role in Settings and
+  copy its ID, the last part of the URL (`/settings/members/roles/<id>`).
 
 ## 1. Rehearse first
 
@@ -126,7 +130,7 @@ Go to **Settings → Applications → WhatsApp** and set these variables:
 
 | Variable | Set to |
 | --- | --- |
-| `WA_ALLOW_AGENT_ROLES` | The agent role IDs from *Before you start*. Members of a listed role use the inbox as agents: they can read and send, but not manage templates, campaigns or settings. Leave it empty if everyone who uses the inbox is on a WhatsApp role or is a workspace admin. |
+| `WA_ALLOW_AGENT_ROLES` | The agent roles from *Before you start*: ticked by name from 0.1.4, or their IDs on 0.1.3. Members of a listed role use the inbox as agents: they can read and send, but not manage templates, campaigns or settings. Leave it empty if everyone who uses the inbox is on a WhatsApp role or is a workspace admin. |
 | `WA_TIME_ZONE` | Your customers' IANA zone, such as `Europe/Lisbon`. Defaults to `Africa/Luanda`, the zone earlier versions hardcoded. |
 | `WA_DEFAULT_COUNTRY_CALLING_CODE` | Check it is your country's code. If it still shows the shipped `+244`, numbers stored without a country code are being sent to Angola. |
 
