@@ -1,3 +1,4 @@
+import { parseListValue } from '../domain/list-value';
 import { DEFAULT_TIME_ZONE, resolveTimeZone } from '../domain/time-zone';
 
 /**
@@ -46,30 +47,12 @@ export const boolVar = (name: string, fallback: boolean): boolean => {
   return fallback;
 };
 
-/**
- * Lists, trimmed, empties dropped.
- *
- * Twenty injects `ARRAY` variables as JSON (`["STOP","SAIR"]`); a hand-typed
- * comma-separated value is accepted too. Splitting the JSON on commas would
- * leave brackets and quotes on the first and last items.
- */
+/** Lists, parsed as the settings panel parses them (`domain/list-value.ts`). */
 export const listVar = (name: string, fallback: string[]): string[] => {
   const value = raw(name);
   if (value === undefined) return fallback;
 
-  const parsed = ((): unknown[] | null => {
-    try {
-      const json: unknown = JSON.parse(value);
-
-      return Array.isArray(json) ? json : null;
-    } catch {
-      return null;
-    }
-  })();
-
-  const items = (parsed ?? value.split(','))
-    .map((item) => String(item).trim())
-    .filter((item) => item.length > 0);
+  const items = parseListValue(value);
 
   return items.length === 0 ? fallback : items;
 };
