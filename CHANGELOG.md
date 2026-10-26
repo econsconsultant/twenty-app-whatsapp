@@ -2,6 +2,17 @@
 
 All notable changes to this application are documented in this file.
 
+## 0.1.4 — agent roles by name
+
+### Changed
+
+- **`WA_ALLOW_AGENT_ROLES` is a checklist of the workspace's roles** in the Variables tab, instead
+  of a text box for role IDs copied from a settings URL. The variable still stores role IDs, so
+  renaming a role does not change who gets in. Roles that already grant access (workspace admins
+  and this app's own roles) and roles no member can hold are not offered. A stored ID whose role
+  no longer exists stays listed, ticked, until it is cleared. If the roles cannot be read, the
+  field falls back to the text box.
+
 ## 0.1.3 — Twenty 2.49
 
 Every inbox request on Twenty 2.44 and later was refused with *"This action requires the WhatsApp
