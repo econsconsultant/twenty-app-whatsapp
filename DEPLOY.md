@@ -121,7 +121,15 @@ view or role. Do not apply it.
 yarn twenty apply -r production
 ```
 
-It shows the same plan, asks you to confirm the destroys, then syncs. Do **not** use `yarn twenty
+It shows the same plan, asks you to confirm the destroys, then syncs.
+
+If the upload step fails with `connect ETIMEDOUT` next to `ENETUNREACH` on an IPv6 address
+(common on WSL, which has no IPv6 route), Node's dual-stack fallback is giving up on IPv4 too
+early under 80-odd parallel uploads. Nothing was synced; run it again with IPv4 forced:
+
+```bash
+NODE_OPTIONS="--dns-result-order=ipv4first --no-network-family-autoselection" yarn twenty apply
+``` Do **not** use `yarn twenty
 dev` against a live workspace: it is a watch mode meant for development.
 
 ### Configure
