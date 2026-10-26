@@ -80,7 +80,7 @@ reproduces the same path with demo data (Docker, about 15 minutes):
 ## 2. Upgrade
 
 ```bash
-git clone -b fix/twenty-v2.49 https://github.com/econsconsultant/twenty-app-whatsapp.git
+git clone https://github.com/econsconsultant/twenty-app-whatsapp.git
 cd twenty-app-whatsapp
 corepack enable
 yarn install --immutable
